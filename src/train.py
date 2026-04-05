@@ -62,27 +62,25 @@ model = LogisticRegression(max_iter=200)
 # =========================
 # STEP 8: MLflow tracking
 # =========================
-mlflow.start_run()
+import os
 
-# Train model
+USE_MLFLOW = os.getenv("USE_MLFLOW", "1") == "1"
+
+if USE_MLFLOW:
+    mlflow.start_run()
+
+# Train
 model.fit(X_train_vec, y_train)
 
-# Predict
 y_pred = model.predict(X_test_vec)
-
-# Accuracy
 acc = accuracy_score(y_test, y_pred)
 
-# Log metrics
-mlflow.log_metric("accuracy", acc)
+if USE_MLFLOW:
+    mlflow.log_metric("accuracy", acc)
+    mlflow.sklearn.log_model(model, "model")
+    mlflow.end_run()
 
-# Save model
-mlflow.sklearn.log_model(model, "model")
-
-# Print result
 print("================================")
 print("Model trained successfully")
 print("Accuracy:", acc)
 print("================================")
-
-mlflow.end_run()
